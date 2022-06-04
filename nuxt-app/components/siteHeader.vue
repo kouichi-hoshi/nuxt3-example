@@ -2,12 +2,12 @@
 </script>
 
 <template>
-  <header>
-    <h1>header</h1>
+  <header class="flex justify-between p-4">
+    <h1>Site title</h1>
     <nav>
-      <ul>
+      <ul class="flex">
         <li>menu1</li>
-        <li>menu2</li>
+        <li class="ml-4">menu2</li>
       </ul>
     </nav>
   </header>
