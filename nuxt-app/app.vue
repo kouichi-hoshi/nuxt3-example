@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <main>
     <siteHeader />
-  </div>
+    <article class="container p-4 mx-auto">
+      <viewCalendar />
+    </article>
+  </main>
 </template>
