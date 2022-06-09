@@ -15,5 +15,8 @@ export default defineNuxtConfig({
       'timezone' // import 'dayjs/plugin/timezone'
     ] // Your Day.js plugin
   },
-  buildModules: ['@nuxt/typescript-build']
+  buildModules: [
+    '@nuxt/typescript-build',
+    '@nuxtjs/eslint-module',
+  ]
 })
