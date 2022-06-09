@@ -1,9 +1,8 @@
 <script setup lang="ts">
-
 import dayjs from 'dayjs'
-import {weekdaysShort as weekdays} from 'dayjs/locale/ja'
-import ja from 'dayjs/locale/ja';
-dayjs.locale(ja);
+import { weekdaysShort as weekdays } from 'dayjs/locale/ja'
+import ja from 'dayjs/locale/ja'
+dayjs.locale(ja)
 //import updateLocale from 'dayjs/plugin/updateLocale'
 // dayjs.extend(updateLocale)
 // dayjs.updateLocale('ja', {
@@ -18,8 +17,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 interface NowDate {
-  nowDayWeek: Number,
-  today: String,
+  nowDayWeek: Number
+  today: String
   startWeekday: Number
   lastEndDate: Number
   endWeekday: Number
@@ -32,13 +31,13 @@ interface NowDate {
 const setDay = () => {
   if (props.setDay) {
     return dayjs(props.setDay)
-  }  else {
+  } else {
     return dayjs()
   }
 }
 
 const now = setDay() // 現在の日付情報を取得
-const nowDate:NowDate = {
+const nowDate: NowDate = {
   nowDayWeek: now.day(), // 曜日 0(日曜日)~6(土曜日)
   today: now.format('YYYY年M月'), // 本日の日付（フォーマット付き）
 
@@ -51,7 +50,7 @@ const nowDate:NowDate = {
 
 //先月の日付で埋める
 const lastMonth = []
-for (let date:Number = nowDate.startWeekday; date > 0; date--) {
+for (let date: Number = nowDate.startWeekday; date > 0; date--) {
   lastMonth.push(Number(nowDate.lastEndDate) - Number(date) + 1)
 }
 
@@ -61,7 +60,7 @@ const thisMonth = {
   week2: [],
 }
 //TODO: 日にちのデータ構造を見直す（週単位でオブジェクトにまとめる）
-for (let date:Number = 1; date <=Number(nowDate.endDate); date++) {
+for (let date: Number = 1; date <= Number(nowDate.endDate); date++) {
   const current = now.set('date', Number(date))
   const weekday = current.get('day')
   if (date <= weekday) {
@@ -73,11 +72,11 @@ for (let date:Number = 1; date <=Number(nowDate.endDate); date++) {
 
 //次月の日付で埋める
 const nextDay = []
-for (let date:Number = 1; date < (7 - Number(nowDate.endWeekday)); date++) {
+for (let date: Number = 1; date < 7 - Number(nowDate.endWeekday); date++) {
   thisMonth.week2.push(date)
   nextDay.push(date)
 }
-function nextDays(d:Number) {
+function nextDays(d: Number) {
   const nextDaysClass = 7 - nowDate.endWeekday
   if (1 < d && d > nextDaysClass) {
     return false
@@ -85,52 +84,57 @@ function nextDays(d:Number) {
     return true
   }
 }
-
 </script>
 
 <template>
   <table class="m-2">
-    <caption>{{nowDate.today}}</caption>
+    <caption>
+      {{
+        nowDate.today
+      }}
+    </caption>
     <tbody>
       <tr>
-        <th v-for="(weekday, i) in weekdays" :key="i">{{weekday}}</th>
+        <th v-for="(weekday, i) in weekdays" :key="i">{{ weekday }}</th>
       </tr>
       <tr>
-        <td v-for="(day, i) in lastMonth" :key="i" class="text-slate-400 pointer-events-none">{{day}}</td>
-        <td v-for="(day, i) in thisMonth.week1" :key="i">{{day}}</td>
-      </tr>
-      <tr>
-        <template v-for="(day, i) in thisMonth.week2" :key="i">
-          <td v-if="i <= 6">{{day}}</td>
-      </template>
+        <td v-for="(day, i) in lastMonth" :key="i" class="text-slate-400 pointer-events-none">{{ day }}</td>
+        <td v-for="(day, i) in thisMonth.week1" :key="i">{{ day }}</td>
       </tr>
       <tr>
         <template v-for="(day, i) in thisMonth.week2" :key="i">
-          <td v-if="6 < i && i <= 13">{{day}}</td>
+          <td v-if="i <= 6">{{ day }}</td>
         </template>
       </tr>
       <tr>
         <template v-for="(day, i) in thisMonth.week2" :key="i">
-          <td v-if="13 < i && i <= 20">{{day}}</td>
+          <td v-if="6 < i && i <= 13">{{ day }}</td>
         </template>
       </tr>
       <tr>
         <template v-for="(day, i) in thisMonth.week2" :key="i">
-          <td v-if="20 < i && i <= 27" v-bind:class="{'text-slate-400 pointer-events-none': nextDays(day)}">{{day}}</td>
+          <td v-if="13 < i && i <= 20">{{ day }}</td>
         </template>
       </tr>
       <tr>
         <template v-for="(day, i) in thisMonth.week2" :key="i">
-          <td v-if="27 < i"  v-bind:class="{'text-slate-400 pointer-events-none': nextDays(day)}">{{day}}</td>
+          <td v-if="20 < i && i <= 27" v-bind:class="{ 'text-slate-400 pointer-events-none': nextDays(day) }">
+            {{ day }}
+          </td>
+        </template>
+      </tr>
+      <tr>
+        <template v-for="(day, i) in thisMonth.week2" :key="i">
+          <td v-if="27 < i" v-bind:class="{ 'text-slate-400 pointer-events-none': nextDays(day) }">{{ day }}</td>
         </template>
       </tr>
     </tbody>
   </table>
-
 </template>
 
 <style>
-td, th {
+td,
+th {
   text-align: center;
   padding: 8px;
   border: 1px gray solid;
