@@ -11,36 +11,56 @@ interface intPerido {
   end: Number
 }
 const periodYear: intPerido = {
-  start: 1999,
-  end: 2025,
+  start: Number(year.value) - 5,
+  end: Number(year.value) + 5,
 }
 const periodMonth: intPerido = {
   start: 1,
-  end: 12,
+  end: 13,
+}
+
+// 日付の選択肢データを生成
+function createSequence(start:Number, end:Number) {
+  const sequence = []
+  for (let i:any = start; i < end; i++) {
+    sequence.push(i)
+  }
+  return sequence
 }
 
 </script>
 
 <template>
   <main>
-    <siteHeader />
-    <article class="container p-4 mx-auto flex flex-wrap">
-      <div class="mx-auto">
-        <div class="mb-12">
-          <viewCalendar class="mx-auto" :set-day="setDate" />
+    <siteHeader class="mb-6" />
+    <article class="container mx-auto p-4">
+      <viewCalendar class="mx-auto mb-12" :set-day="setDate" />
+      <div class="flex justify-center mb-6">
+        <div class="flex-initial bg-white shadow-md rounded mx-1">
+          <select name="year" class="cursor-pointer text-center p-4 mr-2" v-model="year">
+            <option
+              v-for="(year, i) in createSequence(periodYear.start, periodYear.end)"
+              :key="i"
+            >
+              {{ year }}
+            </option>
+          </select>
         </div>
-        <div>
-          <label for="pet-select" class="block text-center mb-2">{{ year }}年{{ month }}月</label>
-          <div class="bg-white shadow-md rounded flex justify-center">
-            <select name="year" class="cursor-pointer text-center m-2" v-model="year">
-              <option v-for="(year, i) in periodYear" :key="i">{{ year }}年</option>
-            </select>
-            <span class="self-center px-4">|</span>
-            <select name="month" class="cursor-pointer text-center m-2" v-model="month">
-              <option v-for="(month, i) in periodMonth" :key="i">{{ month }}月</option>
-            </select>
-          </div>
+        <div class="flex-initial bg-white shadow-md rounded mx-1">
+          <select name="month" class="cursor-pointer text-center p-4 mr-2" v-model="month">
+            <option
+              v-for="(year, i) in createSequence(periodMonth.start, periodMonth.end)"
+              :key="i"
+            >
+              {{ year }}
+            </option>
+          </select>
         </div>
+      </div>
+      <div class="flex justify-center">
+        <div class="flex-initial bg-white shadow-md rounded mx-1"><button class="p-4 mx-2">すすむ</button></div>
+        <div class="flex-initial bg-white shadow-md rounded mx-1"><button class="p-4 mx-2">もどる</button></div>
+        <div class="flex-initial bg-white shadow-md rounded mx-1"><button class="p-4 mx-2">今月</button></div>
       </div>
     </article>
   </main>
