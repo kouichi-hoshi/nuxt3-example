@@ -11,19 +11,30 @@ dayjs.locale(ja)
 // })
 
 /**
- * データ設定
+ * カレンダー初期設定
  */
 
-// カレンダーの起点となる日付を親コンポーネントから受取
 interface Props {
   setDay: string
 }
 
+// カレンダーの起点年月をPropsで受取
 const props = withDefaults(defineProps<Props>(), {
   setDay: '',
 })
 
-// 基準データ型定義
+// Propsで渡された年月または本日の年月を返す
+function setDay() {
+  if (props.setDay) {
+    return dayjs(props.setDay)
+  } else {
+    return dayjs()
+  }
+}
+
+// カレンダー起点年月を生成
+let now = setDay()
+
 interface NowDate {
   nowDayWeek: Number
   today: String
@@ -34,7 +45,7 @@ interface NowDate {
   nowYM: String
 }
 
-// 基準データオブジェクト
+// 基本情報オブジェクト
 const nowDate: NowDate = reactive({
   nowDayWeek: 0, // 曜日 0(日曜日)~6(土曜日)
   today: "", // 本日の日付（フォーマット付き）
@@ -45,8 +56,7 @@ const nowDate: NowDate = reactive({
   nowYM: "",
 })
 
-// 日にちデータオブジェクト型定義
-// TODO: 型定義を最適な形に分割・共通化する
+// TODO: 最適な形に分割・共通化する
 interface TheMonth {
   allDays: Number[],
   week1: Number[],
@@ -58,8 +68,8 @@ interface TheMonth {
   prevStartWeekDay: Number[]
 }
 
-// 日にちデータオブジェクト
-// TODO: オブジェクトを最適な形に分割・統合する
+// カレンダー日にちオブジェクト
+// TODO: 最適な形に分割・統合する
 const theMonth:TheMonth = {
   allDays: [],
   week1: [],
@@ -73,26 +83,21 @@ const theMonth:TheMonth = {
 
 
 /**
- * 初期化/更新 処理
+ *更新処理
  */
 
-// 本日の年月 または Propsで渡された年月日を返す
-function setDay() {
-  if (props.setDay) {
-    return dayjs(props.setDay)
-  } else {
-    return dayjs()
-  }
-}
-
-// Propsの変更時にこの関数を使って年月を切り替える
+// カレンダーの起点年月を変更
+//TODO propsで年月データが渡されなかった場合、更新されない不具合あり
 function updateDay() {
   if (props.setDay) {
     now = dayjs(props.setDay)
   } else {
+    // TODO 本日の日付を渡すのではなく、select要素で指定した年月を渡す
     now = dayjs()
   }
+  console.log(now)
 }
+
 //基準データをセットする
 function setNowDate() {
   nowDate.nowDayWeek = now.day() // 曜日 0(日曜日)~6(土曜日)
@@ -104,20 +109,21 @@ function setNowDate() {
   nowDate.nowYM = dayjs().format('YYYY年M月')
 }
 
-// 今日の日付と表示中のカレンダーの日付を比較して真偽値を返す
+// 表示中のカレンダーの日付の中で今日の日付を検知したらtrueを返す
 function checkToday() {
   if (nowDate.today === nowDate.nowYM) {
     return Number(dayjs().format('DD'))
   }
 }
 
-// カレンダー初期化処理
+// カレンダーリセット処理
 function initTeMonth() {
 
-  // 今月の日にちを初期化
+  // セットされている日にちをクリア
   theMonth.allDays.splice(0, theMonth.allDays.length)
   theMonth.prevStartWeekDay.splice(0, theMonth.prevStartWeekDay.length)
 
+  // リセット対象配列をセット
   // TODO: 配列を動的生成に変更
   const week = [
     theMonth.week1, theMonth.week2,
@@ -125,17 +131,17 @@ function initTeMonth() {
     theMonth.week5, theMonth.week6,
   ]
 
-  // 初期化実行
+  // セットされているカレンダーをクリア
   week.forEach((v, i) => {
     week[i].splice(0,week[i].length)
   })
 
 }
 
-//カレンダーデータ生成
-function setLastWeek3() {
+// カレンダーの日にちをセットする
+function setMonthDays() {
 
-  //複数データを直列処理するためのindex値
+  // 複数データを直列処理するためのindex値
   let count :any = Number(0)
 
   // 今月の一週間目の空欄（1日以前の日にち）を先月の日にちでセットする
@@ -144,25 +150,31 @@ function setLastWeek3() {
     count++
   }
 
-  //
+  // セットする先月の週末の日にちの個数をセットする
   theMonth.prevStartWeekDay.push(count)
 
   // 今月のすべての日にちをセットする
   for (let i = 1; i <= nowDate.endDate; i ++) {
     theMonth.allDays.push(i)
   }
+
   // 今月の最終週の空欄（末日以後の日にち）を来月の日にちでセットする
   let last = []
   for (let i = 1; i < (7 - Number(nowDate.endWeekday)); i++) {
     theMonth.allDays.push(i)
   }
+
 }
 
-//先月 または 来月
+/**
+ * 先月 または 来月の日にちであればtrueを返す（要素にclassを付ける）
+ * @param month check対象の月をセットする  "prev"←先月 "next"←来月
+ * @param day check対象の日にちを受け取る
+ */
 function checkDate(month:String, day:Number) {
   const prev = Number(theMonth.prevStartWeekDay)
 
-  //先月
+  //先月の日付であるかチェックする
   if (month === "prev") {
     if (prev <= day) {
       return false
@@ -171,7 +183,7 @@ function checkDate(month:String, day:Number) {
     }
   }
 
-  //来月
+  //来月の日付であるかチェックする
   if (month === "next") {
     if (day > 1 && 7 < day) {
       return false
@@ -182,7 +194,7 @@ function checkDate(month:String, day:Number) {
 }
 
 // 今月のカレンダーの日にちを週単位で分割する
-function setThisMonth3() {
+function splitWeek() {
   theMonth.allDays.forEach( (v, i)=> {
     if(i < 7) {
       theMonth.week1.push(v)
@@ -201,11 +213,6 @@ function setThisMonth3() {
 }
 
 /**
- * 初期化実行
- */
-let now = setDay() // カレンダー起点日生成
-
-/**
  * 初期化処理実行 / 更新監視
  */
 watchEffect(()=> {
@@ -215,8 +222,8 @@ watchEffect(()=> {
   updateDay()
   setNowDate()
   initTeMonth()
-  setLastWeek3()
-  setThisMonth3()
+  setMonthDays()
+  splitWeek()
 })
 
 </script>
